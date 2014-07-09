@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>To watch or to touch, browsers are open source for a reason</title>
+
+		<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+		<meta name="author" content="Hakim El Hattab">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+		<script>
+			if( window.location.search.match( /print-pdf/gi ) ) {
+				var link = document.createElement( 'link' );
+				link.rel = 'stylesheet';
+				link.type = 'text/css';
+				link.href = 'css/print/pdf.css';
+				document.getElementsByTagName( 'head' )[0].appendChild( link );
+			}
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+<section>
+	<h1>To watch or to touch, browsers are open source for a reason</h1>
+	<p>
+		<small>Grzegorz Tańczyk, fb@tanczyk.pl</small>
+	</p>
+</section>
+<section>
+	<h2>My story</h2>
+	<table>
+  	  <tr><td>1998</td><td>programming a lot: Turbo Pascal, Delphi, C++, asm, DirectX, OpenGL, gamedev wannabe, founder of Warsztat(gamedev.pl)</td></tr>
+  	  <tr><td>2004</td><td>serious business, simple classified ads website, yet very profitable</td></tr>
+  	  <tr><td>2012</td><td><b>Gemius</b> - tracking scripts, gemiusDirectEffect webapp</td></tr>
+  	  <tr><td>2013</td><td><b>Spartez/Atlassian</b> - JIRA, legacy code and monstrous ecosystem</td></tr>
+	</table>
+</section>
+<section>
+	<h3>Sources of headache</h3>
+	<ul>
+		<li>Unknown execution environment</li>
+		<li>Uncertainty if any 3rd party code will break our system</li>
+		<li>Can we break anything with our code?</li>
+		<li>What assumptions do we rely on?</li>
+		<li>Can I sleep well after deployment?</li>
+	</ul>
+</section>
+<section>
+	<h3><i>Natura abhorret vacuum</i></h3>
+</section>
+<section>
+	<h2>Prerequisites</h2>
+</section>
+<section>
+	<section>
+		<h2>Issue trackers</h2>
+	</section>
+	<section>
+		<a href="https://bugzilla.mozilla.org/">https://bugzilla.mozilla.org/</a>
+		<img src="tracker-bugzilla.png"/>
+	</section>
+	<section>
+		<a href="https://code.google.com/p/chromium/issues/list">https://code.google.com/p/chromium/issues/list</a>
+		<img src="tracker-chromium.png"/>
+	</section>
+	<section>
+	  <a href="http://trac.webkit.org/">http://trac.webkit.org/</a>
+		<img src="tracker-trac.png"/>
+	</section>
+	<section>
+		<a href="https://connect.microsoft.com/IE/Feedback">https://connect.microsoft.com/IE/Feedback</a>
+		<img src="tracker-connect.png"/>
+	</section>
+</section>
+<section>
+	<section>
+		<h2>Source code</h2>
+	</section>
+	<section>
+		<a href="http://mxr.mozilla.org/mozilla-aurora/source/">http://mxr.mozilla.org/mozilla-aurora/source/</a>
+		<img src="source-mozilla.png"/>
+	</section>
+	<section>
+		<a href="https://code.google.com/p/chromium/codesearch">https://code.google.com/p/chromium/codesearch</a>
+		<img src="source-chromium.png"/>
+	</section>
+	<section>
+		<a href="https://trac.webkit.org/browser">https://trac.webkit.org/browser</a>
+		<img src="source-trac.png"/>
+	</section>
+	<section>
+		<a href="http://msdn.microsoft.com/en-us/library/ie/hh828809">http://msdn.microsoft.com/en-us/library/ie/hh828809</a>
+		<img src="source-msdn.png"/>
+	</section>
+	<section>
+		<h2>or...</h2>
+		<pre><code class="bash">git clone git://git.webkit.org/WebKit.git WebKit
+git clone https://chromium.googlesource.com/chromium/src
+hg clone https://hg.mozilla.org/mozilla-central/ firefox</code></pre>
+	</section>
+</section>
+<section>
+	<section>
+		<h2>Tests</h2>
+	</section>
+	<section>
+		<h2>Mozilla</h2>
+		<pre><code class="html">&lt;!DOCTYPE HTML&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;&gt;
+  &lt;script type=&quot;application/javascript&quot; src=&quot;/tests/SimpleTest/SimpleTest.js&quot;&gt;&lt;/script&gt;
+  &lt;script type=&quot;text/javascript&quot; src=&quot;/tests/SimpleTest/EventUtils.js&quot;&gt;&lt;/script&gt;
+  &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;/tests/SimpleTest/test.css&quot;/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;p id=&quot;display&quot;&gt;&lt;/p&gt;
+&lt;div id=&quot;content&quot; style=&quot;display: none&quot;&gt;
+&lt;/div&gt;
+&lt;div id=&quot;testDiv&quot;&gt; &lt;/div&gt;
+&lt;script&gt;
+var textNode = testDiv.firstChild;
+var range = new Range();
+range.selectNodeContents(textNode);
+is(range.getClientRects().length, 1, &quot;Text node should have a rectangle&quot;);
+var rect = range.getClientRects()[0];
+ok(rect.left &gt; 0, &quot;Rectangle x should be greater than zero&quot;);
+ok(rect.top &gt; 0, &quot;Rectangle y should be greater than zero&quot;);
+is(rect.width, 0, &quot;Rectangle should be zero width&quot;);
+is(rect.height, 0, &quot;Rectangle should be zero height&quot;);
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+	</section>
+	<section>
+		<h2>Chrome</h2>
+		<pre><code class="javascript">window.addEventListener('DOMContentLoaded', function() {
+  var body = document.body;
+  var div = body.appendChild(document.createElement('div'));
+  var input1 = body.appendChild(document.createElement('input'));
+  var input2 = body.appendChild(document.createElement('input'));
+
+  input1.focus();
+  input1.addEventListener('blur', function() {
+    div.setAttribute('baz', 'bat');
+  });
+
+  var success = false;
+  var mutationsDelivered = false;
+
+  var MutationObserver = MutationObserver || WebKitMutationObserver;
+  var observer = new MutationObserver(function() {
+    mutationsDelivered = true;
+    if (success)
+      chrome.test.succeed();
+  });
+  observer.observe(document, { subtree: true, attributes: true });
+
+  // The getAll callback should be counted as a V8RecursionScope and cause
+  // the delivery of MutationRecords to be delayed until it has exited.
+  chrome.windows.getAll(function() {
+    div.setAttribute('foo', 'bar');
+    input2.focus();
+    if (mutationsDelivered)
+      chrome.test.fail();
+    else
+      success = true;
+  });</code></pre>
+	</section>
+	<section>
+		<h2>WebKit</h2>
+		<pre><code class="javascript">var t = async_test("arc() from 0 to pi does not draw anything in the wrong half");
+_addTest(function(canvas, ctx) {
+
+ctx.fillStyle = '#0f0';
+ctx.fillRect(0, 0, 100, 50);
+ctx.lineWidth = 50;
+ctx.strokeStyle = '#f00';
+ctx.beginPath();
+ctx.arc(50, 50, 50, 0, Math.PI, false);
+ctx.stroke();
+_assertPixel(canvas, 50,25, 0,255,0,255, "50,25", "0,255,0,255");
+_assertPixel(canvas, 1,1, 0,255,0,255, "1,1", "0,255,0,255");
+_assertPixel(canvas, 98,1, 0,255,0,255, "98,1", "0,255,0,255");
+_assertPixel(canvas, 1,48, 0,255,0,255, "1,48", "0,255,0,255");
+_assertPixel(canvas, 20,48, 0,255,0,255, "20,48", "0,255,0,255");
+_assertPixel(canvas, 98,48, 0,255,0,255, "98,48", "0,255,0,255");
+
+
+});</code></pre>
+	</section>
+	<section>
+		<h2>MSIE</h2>
+		<p>Remarks in MSDN are quite useful and informative</p>
+	</section>
+</section>
+<section>
+	<h2>Real world examples</h2>
+</section>
+<section>
+	<section>
+			<h3>256 CSS Classes Can Override an #id</h3>
+	</section>
+	<section>
+			<img src="css-256-hn.png"/>
+	</section>
+	<section>
+			<img src="css-256-src.png"/>
+	</section>
+</section>
+<section>
+	<section>
+		<h3>Can I drag email from MS Outlook to browser?</h3>
+		<img src="example-outlook.png"/>
+	</section>
+	<section>
+		<img src="howaboutno.png"/>
+	</section>
+	<section>
+		<h3>Why?</h3>
+		<img src="why.png"/>
+	</section>
+	<section>
+		<img src="example-outlook-bugzilla.png"/>
+	</section>
+	<section>
+		<img src="example-outlook-patch.png"/>
+	</section>
+	<section>
+		<h4>diff -r dfaba4e449bd widget/src/windows/nsClipboard.cpp</h4>
+		<pre><code class="cpp">+  // If the format is CF_HDROP and we haven't found any files we can try looking
++  // for virtual files with FILEDESCRIPTOR.
++  if ((hres != S_OK) && (format == CF_HDROP)) {
++    hres = FillSTGMedium(
++      aDataObject,
++      nsClipboard::CF_FILEDESCRIPTOR,
++      &fe,
++      &stm,
++      TYMED_HGLOBAL);
++  }
++</code></pre>
+		<p>"CF_HDROP Outlook" -> Google.com</p>
+	</section>
+	<section>
+		<h3>We've got a clue!</h3>		
+		<img src="example-outlook-format.png"/>
+	</section>
+	<section>
+		<img src="example-outlook-clue.png"/>
+	</section>
+	<section>
+		<img src="example-outlook-jira.png"/>
+	</section>
+	<section>
+		<img src="example-outlook-tim.png"/>
+	</section>
+	<section>
+		<img src="example-outlook-noclue.png"/>
+	</section>
+</section>
+<section>
+	<section>
+		<h3>Measuring visibility of cross-domain iframe</h3>
+		<ul>
+			<li>Advertising industry spends billions of dollars on ad impressions</p>
+			<li>Most of those are never seen by audience</li>
+			<li>Advertisers would like to measure the ad viewability metric</li>
+			<li>Majority of ads are served via cross domain iframes</li>
+		</ul>
+	</section>
+	<section>
+		<h3>It is not possible to check iframe visibility</h3>
+		<img src="so-frame.png"/>
+	</section>
+	<section>
+		<h3>A blast from the past</h3>
+		<p>Viewing frustum culling anyone?</p>
+		<img src="325px-View_frustum_culling.svg.png" />
+	</section>
+	<section>
+		<object allowscriptaccess="never" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="https://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,0,0" data="inscrtechdemo.swf" height="675" type="application/x-shockwave-flash" width="900">
+		   <param name="AllowScriptAccess" value="never">                 <param name="play" value="true">
+		                  <param name="autostart" value="true">
+		                  <param name="data" value="inscrtechdemo.swf">
+		                  <param name="loop" value="false">
+		                  <param name="menu" value="false">
+		                  <param name="movie" value="inscrtechdemo.swf">
+		                  <param name="quality" value="high">
+		                  <param name="scale" value="exactfit">
+		                  <param name="src" value="inscrtechdemo.sw">
+		                  <param name="type" value="application/x-shockwave-flash">
+		              <embed allowscriptaccess="never" play="true" autostart="true" height="675" pluginspage="https://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash" quality="high" src="inscrtechdemo.swf" type="application/x-shockwave-flash" width="900">
+		  
+		                      </object>
+	</section>
+</section>
+<section>
+	<section>
+		<h3>Chrome</h3>
+	</section>
+	<section>
+		<img src="iframe-chrome-loadtimes.png"/>
+	</section>
+	<section>
+		<img src="iframe-chrome-loadtimes-hint.png"/>
+	</section>
+	<section>
+		<img src="iframe-chrome-pt-1.png"/>
+	</section>
+	<section>
+		<img src="iframe-chrome-pt-2.png"/>
+	</section>
+	<section>
+		<img src="iframe-chrome-pt-3.png"/>
+	</section>
+	<section>
+		<img src="iframe-chrome-pt-4.png"/>
+	</section>
+	<section>
+		<img src="ceiling-cat-rises.gif" width="900" />
+	</section>
+	<section>
+		<img src="iframe-chrome-pt-6.png"/>
+	</section>
+	<section>
+		<img src="iframe-chrome-pt-5.png"/>
+	</section>
+	<section>
+		<img src="iframe-chrome-pt-7.png"/>
+	</section>
+	<section>
+		<img src="TruthIsOutThere.jpg"/>
+	</section>
+	<section>
+		<img src="iframe-chrome-pt-8.png"/>
+	</section>
+</section>
+<section>
+	<section>
+		<h3>Firefox</h3>
+	</section>
+	<section>
+		<pre><code class="javascript">for(var key in window) {
+  key.match(/paint/i) && 
+    console.log(key)
+}</code></pre>
+		<pre><code class="bash">> mozPaintCount</code></pre>
+	</section>
+	<section>
+		<h4>source/layout/base/tests/test_mozPaintCount.html</h4>
+		<pre><code class="javascript">SimpleTest.waitForExplicitFinish();
+
+var startPaintCount = window.mozPaintCount;
+ok(true, "Got to initial paint count: " + startPaintCount);
+var color = 0;
+
+function doPluginFlicker() {
+  ok(true, "Plugin color iteration " + color + ", paint count: " + window.mozPaintCount);
+  if (window.mozPaintCount - startPaintCount > 20) {
+    ok(true, "Got enough paints from plugin color changes");
+    SimpleTest.finish();
+    return;
+  }
+
+  color = (color + 1) % 256;
+  var str = color.toString(16);
+  if (str.length < 2) {
+    str = "0" + str;
+  }
+  str = "FF" + str + str + str;
+  document.getElementById("p").setColor(str);
+  setTimeout(doPluginFlicker, 0);
+}
+
+function doBackgroundFlicker() {
+  ok(true, "Background color iteration " + color + ", paint count: " + window.mozPaintCount);
+  if (window.mozPaintCount - startPaintCount > 20) {
+    ok(true, "Got enough paints from background color changes");
+    startPaintCount = window.mozPaintCount;
+    doPluginFlicker();
+    return;
+  }
+
+  color = (color + 1) % 256;
+  document.body.style.backgroundColor = "rgb(" + color + "," + color + "," + color + ")";
+  setTimeout(doBackgroundFlicker, 0);
+}</code></pre>
+	</section>
+	<section>
+		<img src="iframe-mozilla-1.png"/>
+	</section>
+	<section>
+		<img src="iframe-mozilla-2.png"/>
+	</section>
+	<section>
+		<img src="iframe-mozilla-3.png"/>
+	</section>
+	<section>
+		<img src="iframe-mozilla-4.png"/>
+	</section>
+	<section>
+		<img src="iframe-mozilla-5.png"/>
+	</section>
+	<section>
+		<img src="iframe-mozilla-6.png"/>
+	</section>
+	<section>
+		<img src="iframe-mozilla-7.png"/>
+	</section>
+</section>
+<section>
+	<section>
+		<h2>Cross-browser solution</h2>
+	</section>
+	<section>
+		<img src="iframe-xb-1.png"/>		
+	</section>
+	<section>
+		<img src="iframe-xb-2.png"/>		
+	</section>
+	<section>
+		<img src="iframe-xb-3.png"/>		
+	</section>
+</section>
+<section>
+	<section>
+		<h3>W3C Working Groups</h3>
+		<img src="w3draft.png"/>		
+	</section>
+	<section>
+		<h4>document.hidden</h4>
+		<pre>The iFrame that is queried for this attribute is off the screen even though the page that contains the iframe is in the foreground and visible on the screen.</pre>
+	</section>
+	<section>
+		<h3>https://lists.w3.org</h3>
+	</section>
+</section>
+<section>
+	<h2>Contributing code</h2>
+	<ol>
+	  <li>Find a problem</li>
+	  <li>Get in touch with committers(mailing lists, IRC channel)</li>
+	  <li>Open discussion about the problem</li>
+	  <li>Implement the patch</li>
+	  <li>Find a committer and ask for code review</li>
+	</ol>
+</section>
+				<section>
+	<img src="readsource.jpg"/>
+				</section>
+				<section>
+					<h1>END</h1>
+					<h3>Questions?</h3>
+				</section>
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Parallax scrolling
+				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+				// parallaxBackgroundSize: '2100px 900px',
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
