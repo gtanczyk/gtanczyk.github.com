@@ -33,17 +33,18 @@ body {
 .container {
   max-width: 680px;
   margin: 0 auto;
-  padding: 4rem 1.5rem;
+  padding: 2rem 1.5rem;
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
 }
 
 /* Hero Section */
 .hero {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 4rem;
 }
 
 .hero h1 {
@@ -59,66 +60,68 @@ body {
   color: var(--color-text-muted);
 }
 
-/* Bio Section */
-.bio {
-  margin-bottom: 3rem;
-}
-
-.bio h2 {
-  font-size: 1.25rem;
-  font-weight: 500;
-  margin-bottom: 1rem;
-  color: var(--color-text);
-}
-
-.bio p {
-  color: var(--color-text-muted);
-  line-height: 1.8;
-}
-
-/* Social Links Section */
+/* Social Links Section (Game Menu Style) */
 .social-links {
+  width: 100%;
   margin-bottom: 3rem;
-}
-
-.social-links h2 {
-  font-size: 1.25rem;
-  font-weight: 500;
-  margin-bottom: 1.5rem;
-  color: var(--color-text);
 }
 
 .links {
   display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .social-link {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
+  justify-content: flex-start;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  width: 100%;
+  max-width: 360px;
+  background-color: transparent;
+  border: 1px solid transparent;
   border-radius: 8px;
   color: var(--color-text);
   text-decoration: none;
+  font-size: 1.25rem;
   font-weight: 500;
   transition: all 0.2s ease;
 }
 
-.social-link:hover {
-  background-color: var(--color-primary);
-  color: white;
-  border-color: var(--color-primary);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+.social-link::before {
+  content: ">";
+  position: absolute;
+  left: 0;
+  opacity: 0;
+  transition: all 0.2s ease;
+  color: var(--color-primary);
+}
+
+.social-link:hover,
+.social-link:focus {
+  padding-left: 2.5rem;
+  color: var(--color-primary);
+  outline: none;
+}
+
+.social-link:hover::before,
+.social-link:focus::before {
+  left: 1rem;
+  opacity: 1;
 }
 
 .social-link svg {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
+  opacity: 0.7;
+}
+
+.social-link:hover svg {
+  opacity: 1;
 }
 
 /* Footer */
@@ -145,14 +148,6 @@ footer p {
   
   .hero .tagline {
     font-size: 1rem;
-  }
-  
-  .links {
-    flex-direction: column;
-  }
-  
-  .social-link {
-    justify-content: center;
   }
 }
 

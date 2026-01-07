@@ -1,0 +1,26 @@
+{
+  "rootDir": ".",
+  "extensions": [
+    ".js",
+    ".ts",
+    ".jsx",
+    ".tsx",
+    ".mjs",
+    ".mts",
+    ".cjs",
+    ".json",
+    ".md",
+    ".css",
+    ".scss",
+    ".html",
+    ".txt"
+  ],
+  "ignorePaths": [
+    "node_modules",
+    "build",
+    "dist",
+    "coverage",
+    ".next",
+    ".cache"
+  ]
+}
