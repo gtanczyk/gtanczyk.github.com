@@ -41,7 +41,9 @@ at a time. The worker retains the encrypted archive only for password retries;
 after success it terminates before the game starts. Decrypted Blob URLs remain
 owned by the page for scene transitions. The exported render loop yields through
 a timer before scheduling its next animation frame, allowing loader messages,
-input and timers to run even when a frame is expensive.
+input and timers to run even when a frame is expensive. Voiced dialogue advances
+after audio playback ends plus a short pause, independently of the simulation
+clock. Muted or missing voices retain the text-reading fallback.
 
 To rebuild just the loader without changing the encrypted archive or needing its
 password, run `node build-loader.mjs`. The full build also calls this step. ZIP,
