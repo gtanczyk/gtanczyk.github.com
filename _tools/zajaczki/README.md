@@ -49,7 +49,9 @@ worker and loader URLs use content hashes so updates bypass stale HTTP caches.
 
 Before publishing, test: no-hash prompt; wrong password and successful retry;
 encoded hash; desktop and touch viewport; first scene, walking, a conversation,
-scene transition and audio; no plaintext HTTP asset requests. Verify all ZIP
+scene transition and audio; rapid answer clicks must stop the previous voice and
+discard obsolete replies while preserving item and flag effects; no plaintext
+HTTP asset requests. Verify all ZIP
 entries are encrypted, fail without/with a wrong password, and authenticate with
 the chosen password. Check source-photo hashes and public files once more before
 staging. Publish on the existing `master` GitHub Pages branch.
