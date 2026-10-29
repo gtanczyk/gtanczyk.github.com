@@ -20,7 +20,7 @@ const progress = (value, label, detail) => {
 
 async function download() {
   if (archive) return archive;
-  const response = await fetch('./game.zip', { credentials: 'omit' });
+  const response = await fetch('./game.zip?v=' + __ARCHIVE_VERSION__, { credentials: 'omit' });
   if (!response.ok) throw new Error('download');
   const total = Number(response.headers.get('content-length'));
   const reader = response.body.getReader();

@@ -40,7 +40,7 @@ try {
         const files = (p: string) => asset('files/' + p);`);
         text = replaceOnce(text, "fetch('world-data.json')", "fetch(asset('world-data.json'))");
         text = replaceOnce(text, 'this.ui();\n    if (this.data.story', `this.ui();
-        requestAnimationFrame(() => parent.postMessage({ type: 'diorama:ready' }, '*'));
+        parent.postMessage({ type: 'diorama:ready' }, '*');
         if (this.data.story`);
         return { contents: text, loader: 'ts', resolveDir: path.dirname(entry) };
       });
@@ -75,7 +75,9 @@ try {
   const bytes = await zip.close();
   if (bytes.byteLength >= 100 * 1024 * 1024) throw new Error('Archive exceeds GitHub single-file limit.');
   fs.writeFileSync(path.join(output, 'game.zip'), bytes);
-  await build({ entryPoints: [path.join(here, 'loader.js')], bundle: true, format: 'esm', minify: true, target: 'es2022', outfile: path.join(output, 'loader.js'), legalComments: 'eof' });
+  await build({ entryPoints: [path.join(here, 'loader.js')], bundle: true, format: 'esm', minify: true, target: 'es2022', outfile: path.join(output, 'loader.js'), legalComments: 'eof', define: { __ARCHIVE_VERSION__: JSON.stringify(hash(path.join(output, 'game.zip')).slice(0, 16)) } });
+  const landing = path.join(output, 'index.html');
+  fs.writeFileSync(landing, fs.readFileSync(landing, 'utf8').replace(/src="\.\/loader\.js(?:\?v=[^"]*)?"/, `src="./loader.js?v=${hash(path.join(output, 'loader.js')).slice(0, 16)}"`));
   fs.copyFileSync(path.join(diorama, 'app/studio/favicon.svg'), path.join(output, 'diorama.svg'));
   const license = fs.readFileSync(path.join(here, 'node_modules/@zip.js/zip.js/LICENSE'), 'utf8');
   fs.writeFileSync(path.join(output, 'LICENSE-zip.js.txt'), license);
