@@ -1,0 +1,9 @@
+{
+  "name": "zajaczki-private-export",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@zip.js/zip.js": "2.8.11",
+    "esbuild": "0.25.12"
+  }
+}

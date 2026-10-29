@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#f5f0e6">
+  <meta name="description" content="Małe rysunki, wielka przygoda. Gra stworzona podczas warsztatu Zajączków w Dioramie.">
+  <title>Zajączki — świat z naszych rysunków</title>
+  <link rel="icon" href="./diorama.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main id="welcome">
+    <header class="brand"><img src="./diorama.svg" alt="" width="34" height="34"><span>diorama</span></header>
+    <section class="invitation" aria-labelledby="title">
+      <div class="portal" aria-hidden="true">
+        <span class="spark spark-one">✦</span><span class="spark spark-two">✧</span>
+        <svg viewBox="0 0 160 180" fill="none"><defs><clipPath id="arch"><path d="M25 165V75a55 55 0 0 1 110 0v90Z"/></clipPath></defs><path class="arch-outline" d="M16 169V75a64 64 0 0 1 128 0v94Z" stroke="currentColor" stroke-width="3"/><g clip-path="url(#arch)"><path fill="#c6cfda" d="M25 20h110v145H25z"/><circle class="sun" cx="107" cy="62" r="16" fill="#e6ac59"/><path d="M10 129c30-49 56-43 84-17 20 19 37 5 60-16v80H10Z" fill="#8295b5"/><path d="M10 153c33-33 65-30 98-9 14 9 28 4 46-1v33H10Z" fill="#354a78"/><path d="M63 180c-4-15 8-28 25-34 9-3 16-5 22-9-3 13-24 15-25 43" fill="#f5f0e6"/></g></svg>
+        <span class="seed seed-one"></span><span class="seed seed-two"></span>
+      </div>
+      <p class="eyebrow">Z WARSZTATU DO ŚWIATA WYOBRAŹNI</p>
+      <h1 id="title">Małe rysunki.<br><em>Wielka przygoda.</em></h1>
+      <p class="intro">Zajączki narysowały swój świat.<br>Teraz możesz do niego wejść.</p>
+      <form id="unlock">
+        <label for="password">Hasło do naszej gry</label>
+        <div class="password-row"><input id="password" name="password" type="password" required autocomplete="current-password" autocapitalize="none" spellcheck="false" placeholder="Wpisz hasło" aria-describedby="message"><button type="submit">Otwórz przygodę <span aria-hidden="true">↗</span></button></div>
+      </form>
+      <div id="loading" hidden aria-live="polite" aria-atomic="true"><p id="status">Otwieramy świat wyobraźni…</p><progress id="progress" max="100" value="0" aria-label="Przygotowanie gry"></progress><p id="detail">Za chwilę zaczynamy.</p></div>
+      <p id="message" role="alert"></p>
+      <noscript>Włącz JavaScript w przeglądarce, aby otworzyć grę.</noscript>
+    </section>
+    <footer><span>Stworzone przez Zajączki</span><span class="dot" aria-hidden="true">·</span><span>Ożywione w Dioramie</span></footer>
+  </main>
+  <div id="game" hidden></div>
+  <script type="module" src="./loader.js"></script>
+</body>
+</html>
