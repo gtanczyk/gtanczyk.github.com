@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { build } from 'esbuild';
+import { buildLoader } from './build-loader.mjs';
 import { ZipWriter, Uint8ArrayReader, Uint8ArrayWriter, configure } from '@zip.js/zip.js/index-native.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -40,6 +41,8 @@ try {
         const files = (p: string) => asset('files/' + p);`);
         text = replaceOnce(text, "fetch('world-data.json')", "fetch(asset('world-data.json'))");
         text = replaceOnce(text, 'Object.assign(window, { diorama:', 'Object.assign(window, { game:');
+        // Let input, loader messages and timers run even when rendering exceeds one frame.
+        text = replaceOnce(text, 'const frame = (now: number) => {\n  requestAnimationFrame(frame);', 'const frame = (now: number) => {\n  setTimeout(() => requestAnimationFrame(frame), 0);');
         text = replaceOnce(text, 'this.ui();\n    if (this.data.story', `this.ui();
         parent.postMessage({ type: 'game:ready' }, '*');
         if (this.data.story`);
@@ -76,9 +79,7 @@ try {
   const bytes = await zip.close();
   if (bytes.byteLength >= 100 * 1024 * 1024) throw new Error('Archive exceeds GitHub single-file limit.');
   fs.writeFileSync(path.join(output, 'game.zip'), bytes);
-  await build({ entryPoints: [path.join(here, 'loader.js')], bundle: true, format: 'esm', minify: true, target: 'es2022', outfile: path.join(output, 'loader.js'), legalComments: 'eof', define: { __ARCHIVE_VERSION__: JSON.stringify(hash(path.join(output, 'game.zip')).slice(0, 16)) } });
-  const landing = path.join(output, 'index.html');
-  fs.writeFileSync(landing, fs.readFileSync(landing, 'utf8').replace(/src="\.\/loader\.js(?:\?v=[^"]*)?"/, `src="./loader.js?v=${hash(path.join(output, 'loader.js')).slice(0, 16)}"`));
+  await buildLoader();
   fs.copyFileSync(path.join(diorama, 'app/studio/favicon.svg'), path.join(output, 'logo.svg'));
   const license = fs.readFileSync(path.join(here, 'node_modules/@zip.js/zip.js/LICENSE'), 'utf8');
   fs.writeFileSync(path.join(output, 'LICENSE-zip.js.txt'), license);

@@ -35,7 +35,17 @@ new archive but does not revoke copies of an older archive or Git history.
 
 The loader uses [zip.js](https://github.com/gildas-lormeau/zip.js), pinned in the
 lockfile and bundled locally. It requires a modern browser with Web Crypto and
-Web Streams. No CDN is used. Rebuild the loader with the same command as the game.
+Web Streams. No CDN is used. Download, ZIP parsing and AES decryption run in a dedicated Web Worker. The
+response is streamed into a browser-managed Blob, and entries are decrypted one
+at a time. The worker retains the encrypted archive only for password retries;
+after success it terminates before the game starts. Decrypted Blob URLs remain
+owned by the page for scene transitions. The exported render loop yields through
+a timer before scheduling its next animation frame, allowing loader messages,
+input and timers to run even when a frame is expensive.
+
+To rebuild just the loader without changing the encrypted archive or needing its
+password, run `node build-loader.mjs`. The full build also calls this step. ZIP,
+worker and loader URLs use content hashes so updates bypass stale HTTP caches.
 
 Before publishing, test: no-hash prompt; wrong password and successful retry;
 encoded hash; desktop and touch viewport; first scene, walking, a conversation,

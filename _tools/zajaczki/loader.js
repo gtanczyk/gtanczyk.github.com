@@ -1,15 +1,11 @@
-import { ZipReader, BlobReader, BlobWriter, TextWriter, configure, ERR_INVALID_PASSWORD } from '@zip.js/zip.js/index-native.js';
-
-configure({ useWebWorkers: false });
 const $ = (id) => document.getElementById(id);
 const form = $('unlock');
 const passwordInput = $('password');
 const loading = $('loading');
 const created = new Set();
-let archive;
+let unpacker;
 let busy = false;
 let running = false;
-const mime = (name) => ({ png: 'image/png', jpg: 'image/jpeg', webp: 'image/webp', mp3: 'audio/mpeg', wav: 'audio/wav', json: 'application/json', js: 'text/javascript', glb: 'model/gltf-binary' })[name.split('.').pop()] || 'application/octet-stream';
 const objectURL = (blob) => { const url = URL.createObjectURL(blob); created.add(url); return url; };
 const release = () => { for (const url of created) URL.revokeObjectURL(url); created.clear(); };
 const progress = (value, label, detail) => {
@@ -18,23 +14,30 @@ const progress = (value, label, detail) => {
   $('detail').textContent = detail;
 };
 
-async function download() {
-  if (archive) return archive;
-  const response = await fetch('./game.zip?v=' + __ARCHIVE_VERSION__, { credentials: 'omit' });
-  if (!response.ok) throw new Error('download');
-  const total = Number(response.headers.get('content-length'));
-  const reader = response.body.getReader();
-  const chunks = [];
-  let size = 0;
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    chunks.push(value);
-    size += value.length;
-    progress(total ? size / total * 55 : 15, 'Pobieramy świat Zajączków…', `${(size / 1048576).toFixed(1)}${total ? ` z ${(total / 1048576).toFixed(1)}` : ''} MB`);
-  }
-  archive = new Blob(chunks, { type: 'application/zip' });
-  return archive;
+// AES and ZIP parsing must never execute on the page's rendering thread.
+function unpack(password) {
+  unpacker ||= new Worker(new URL('./unpack.js?v=' + __UNPACK_VERSION__, import.meta.url));
+  const worker = unpacker;
+  const assets = Object.create(null);
+  return new Promise((resolve, reject) => {
+    const finish = (error, html) => {
+      worker.onmessage = worker.onerror = worker.onmessageerror = null;
+      if (error?.message !== 'password') {
+        worker.terminate();
+        unpacker = null;
+      }
+      error ? reject(error) : resolve({ html, assets });
+    };
+    worker.onerror = (event) => { event.preventDefault(); finish(new Error('worker')); };
+    worker.onmessageerror = () => finish(new Error('worker'));
+    worker.onmessage = ({ data }) => {
+      if (data.type === 'progress') progress(data.value, data.label, data.detail);
+      else if (data.type === 'asset') assets[data.name] = objectURL(data.blob);
+      else if (data.type === 'done') finish(null, data.html);
+      else if (data.type === 'error') finish(new Error(data.code));
+    };
+    worker.postMessage({ password });
+  });
 }
 
 async function mount(html, assets) {
@@ -85,44 +88,21 @@ async function unlock(password) {
   $('message').textContent = '';
   passwordInput.value = '';
   progress(0, 'Otwieramy świat wyobraźni…', 'Przygotowujemy przygodę.');
-  let zip;
   try {
-    zip = new ZipReader(new BlobReader(await download()), { password });
-    const entries = (await zip.getEntries()).filter((entry) => !entry.directory);
-    if (entries.some((e) => !e.encrypted || /(^\/|(^|\/)\.\.\/|\\)/.test(e.filename))) throw new Error('archive');
-    const index = entries.find((e) => e.filename === 'index.html');
-    if (!index) throw new Error('archive');
-    progress(55, 'Otwieramy sekretną furtkę…', 'Sprawdzamy hasło.');
-    const html = await index.getData(new TextWriter(), { checkSignature: true });
-    const assets = Object.create(null);
-    const total = entries.reduce((n, e) => n + e.uncompressedSize, 0);
-    let done = index.uncompressedSize;
-    for (const entry of entries) {
-      if (entry === index) continue;
-      const blob = await entry.getData(new BlobWriter(mime(entry.filename)), { checkSignature: true });
-      assets[entry.filename] = objectURL(blob);
-      done += entry.uncompressedSize;
-      progress(55 + done / total * 40, 'Budzą się nasi bohaterowie…', `Przygotowanie gry · ${Math.round(done / total * 100)}%`);
-      await new Promise((r) => setTimeout(r, 0));
-    }
-    await zip.close();
-    zip = null;
+    const { html, assets } = await unpack(password);
     progress(95, 'Jeszcze chwila…', 'Rozkładamy pierwszy zakątek świata.');
     await mount(html, assets);
-    archive = null;
   } catch (error) {
-    if (error.message !== ERR_INVALID_PASSWORD) archive = null;
     $('game').replaceChildren();
     $('game').hidden = true;
     release();
     form.hidden = false;
     loading.hidden = true;
-    $('message').textContent = error.message === ERR_INVALID_PASSWORD
+    $('message').textContent = error.message === 'password'
       ? 'To hasło nie otwiera furtki. Spróbuj jeszcze raz.'
       : 'Nie udało się otworzyć gry. Sprawdź połączenie i spróbuj ponownie.';
     passwordInput.focus();
   } finally {
-    await zip?.close().catch(() => {});
     password = '';
     busy = false;
     document.body.classList.remove('busy');
