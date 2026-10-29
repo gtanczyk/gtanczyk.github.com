@@ -1,3 +1,4 @@
+import { download, resetDownload } from './download.js';
 import { ZipReader, BlobReader, BlobWriter, TextWriter, configure, ERR_INVALID_PASSWORD } from '@zip.js/zip.js/index-native.js';
 
 // This entire module runs in our dedicated worker. Do not spawn nested workers.
@@ -7,35 +8,13 @@ let busy = false;
 const mime = (name) => ({ png: 'image/png', jpg: 'image/jpeg', webp: 'image/webp', mp3: 'audio/mpeg', wav: 'audio/wav', json: 'application/json', js: 'text/javascript', glb: 'model/gltf-binary' })[name.split('.').pop()] || 'application/octet-stream';
 const progress = (value, label, detail) => postMessage({ type: 'progress', value, label, detail });
 
-async function download() {
-  if (archive) return archive;
-  const response = await fetch('./game.zip?v=' + __ARCHIVE_VERSION__, { credentials: 'omit' });
-  if (!response.ok || !response.body) throw new Error('download');
-  const total = Number(response.headers.get('content-length'));
-  let size = 0;
-  let last = -Infinity;
-  const meter = new TransformStream({ transform(chunk, controller) {
-    size += chunk.byteLength;
-    const now = performance.now();
-    if (now - last >= 100 || size === total) {
-      progress(total ? size / total * 55 : 15, 'Pobieramy świat Zajączków…', `${(size / 1048576).toFixed(1)}${total ? ` z ${(total / 1048576).toFixed(1)}` : ''} MB`);
-      last = now;
-    }
-    controller.enqueue(chunk);
-  } });
-  // Let the browser manage Blob storage instead of retaining an array of chunks
-  // and then allocating a second complete copy on the page's JS heap.
-  archive = await new Response(response.body.pipeThrough(meter)).blob();
-  return archive;
-}
-
 self.onmessage = async ({ data }) => {
   if (busy || typeof data.password !== 'string' || !data.password) return;
   busy = true;
   let zip;
   let result;
   try {
-    zip = new ZipReader(new BlobReader(await download()), { password: data.password });
+    zip = new ZipReader(new BlobReader(archive ||= await download(progress)), { password: data.password });
     const entries = (await zip.getEntries()).filter((entry) => !entry.directory);
     if (entries.some((e) => !e.encrypted || /(^\/|(^|\/)\.\.\/|\\)/.test(e.filename))) throw new Error('archive');
     const index = entries.find((e) => e.filename === 'index.html');
@@ -58,9 +37,11 @@ self.onmessage = async ({ data }) => {
     archive = null;
     result = { type: 'done', html };
   } catch (error) {
-    const code = error.message === ERR_INVALID_PASSWORD ? 'password' : 'archive';
+    const code = error.message === ERR_INVALID_PASSWORD ? 'password'
+      : typeof error.code === 'string' && error.code.startsWith('download') ? error.code : 'archive';
     if (code !== 'password') archive = null;
-    result = { type: 'error', code };
+    if (!code.startsWith('download') && code !== 'password') resetDownload();
+    result = { type: 'error', code, reason: String(error.message) };
   } finally {
     await zip?.close().catch(() => {});
     data.password = '';

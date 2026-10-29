@@ -22,7 +22,7 @@ function unpack(password) {
   return new Promise((resolve, reject) => {
     const finish = (error, html) => {
       worker.onmessage = worker.onerror = worker.onmessageerror = null;
-      if (error?.message !== 'password') {
+      if (error?.message !== 'password' && !error?.message.startsWith('download')) {
         worker.terminate();
         unpacker = null;
       }
@@ -34,7 +34,10 @@ function unpack(password) {
       if (data.type === 'progress') progress(data.value, data.label, data.detail);
       else if (data.type === 'asset') assets[data.name] = objectURL(data.blob);
       else if (data.type === 'done') finish(null, data.html);
-      else if (data.type === 'error') finish(new Error(data.code));
+      else if (data.type === 'error') {
+        if (data.code !== 'password') console.warn('[game-loader]', data.code, data.reason);
+        finish(new Error(data.code));
+      }
     };
     worker.postMessage({ password });
   });
@@ -100,7 +103,11 @@ async function unlock(password) {
     loading.hidden = true;
     $('message').textContent = error.message === 'password'
       ? 'To hasło nie otwiera furtki. Spróbuj jeszcze raz.'
-      : 'Nie udało się otworzyć gry. Sprawdź połączenie i spróbuj ponownie.';
+      : error.message.startsWith('download')
+        ? 'Pobieranie zostało przerwane. Wpisz hasło ponownie — dokończymy od ostatniej pobranej części.'
+        : error.message === 'start'
+          ? 'Paczka została pobrana, ale gra nie wystartowała. Odśwież stronę i spróbuj ponownie.'
+          : 'Nie udało się otworzyć paczki gry. Odśwież stronę i spróbuj ponownie.';
     passwordInput.focus();
   } finally {
     password = '';

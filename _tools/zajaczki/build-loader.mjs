@@ -14,7 +14,10 @@ export async function buildLoader() {
     entryPoints: [path.join(here, name)], bundle: true, format: name === 'loader.js' ? 'esm' : 'iife',
     minify: true, target: 'es2022', outfile: path.join(output, name), legalComments: 'eof', define,
   });
-  await bundle('unpack.js', { __ARCHIVE_VERSION__: JSON.stringify(hash('game.zip')) });
+  await bundle('unpack.js', {
+    __ARCHIVE_VERSION__: JSON.stringify(hash('game.zip')),
+    __ARCHIVE_BYTES__: String(fs.statSync(path.join(output, 'game.zip')).size),
+  });
   await bundle('loader.js', { __UNPACK_VERSION__: JSON.stringify(hash('unpack.js')) });
   const landing = path.join(output, 'index.html');
   fs.writeFileSync(landing, fs.readFileSync(landing, 'utf8').replace(/src="\.\/loader\.js(?:\?v=[^"]*)?"/, `src="./loader.js?v=${hash('loader.js')}"`));

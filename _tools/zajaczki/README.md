@@ -36,8 +36,11 @@ new archive but does not revoke copies of an older archive or Git history.
 The loader uses [zip.js](https://github.com/gildas-lormeau/zip.js), pinned in the
 lockfile and bundled locally. It requires a modern browser with Web Crypto and
 Web Streams. No CDN is used. Download, ZIP parsing and AES decryption run in a dedicated Web Worker. The
-response is streamed into a browser-managed Blob, and entries are decrypted one
-at a time. The worker retains the encrypted archive only for password retries;
+archive is fetched sequentially using HTTP byte ranges of at most 4 MiB. Each
+fragment has its Content-Range and byte length checked, with three attempts and
+an idle timeout. Completed fragments survive a manual retry in the same tab.
+Each response is streamed into a browser-managed Blob; entries are decrypted one
+at a time. The host must support HTTP Range requests (GitHub Pages does). The worker retains the encrypted archive only for password retries;
 after success it terminates before the game starts. Decrypted Blob URLs remain
 owned by the page for scene transitions. The exported render loop yields through
 a timer before scheduling its next animation frame, allowing loader messages,
@@ -48,6 +51,10 @@ clock. Muted or missing voices retain the text-reading fallback.
 To rebuild just the loader without changing the encrypted archive or needing its
 password, run `node build-loader.mjs`. The full build also calls this step. ZIP,
 worker and loader URLs use content hashes so updates bypass stale HTTP caches.
+
+Run the downloader regression tests with `node --test download.test.mjs`. They
+cover a response cut below 10 MiB, fragment retries, resuming completed fragments,
+incorrect Range responses and browser aborts.
 
 Before publishing, test: no-hash prompt; wrong password and successful retry;
 encoded hash; desktop and touch viewport; first scene, walking, a conversation,
