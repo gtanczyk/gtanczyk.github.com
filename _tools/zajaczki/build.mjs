@@ -33,14 +33,15 @@ try {
         if (args.path !== entry) return;
         let text = fs.readFileSync(entry, 'utf8');
         text = replaceOnce(text, 'const files = (p: string) => `files/${p}`;', `const asset = (p: string): string => {
-          const url = (globalThis as any).__dioramaAssets[p];
+          const url = (globalThis as any).__gameAssets[p];
           if (!url) throw new Error('Missing private asset: ' + p);
           return url;
         };
         const files = (p: string) => asset('files/' + p);`);
         text = replaceOnce(text, "fetch('world-data.json')", "fetch(asset('world-data.json'))");
+        text = replaceOnce(text, 'Object.assign(window, { diorama:', 'Object.assign(window, { game:');
         text = replaceOnce(text, 'this.ui();\n    if (this.data.story', `this.ui();
-        parent.postMessage({ type: 'diorama:ready' }, '*');
+        parent.postMessage({ type: 'game:ready' }, '*');
         if (this.data.story`);
         return { contents: text, loader: 'ts', resolveDir: path.dirname(entry) };
       });
@@ -52,7 +53,7 @@ try {
     .replace('Turn your phone sideways to play.', 'Obróć telefon, aby wygodniej grać.')
     .replace('Play upright anyway', 'Gram w pionie')
     .replace('click to walk or use, double click to hurry · right click or long press to look or put back · WASD or arrows walk (Shift hurries), E uses · 1-9 items · g grid · m sound', 'kliknij, aby podejść lub użyć · strzałki lub WASD: ruch · E: użyj · M: dźwięk');
-  html = html.replace('</head>', `<script>addEventListener('error',()=>parent.postMessage({type:'diorama:error'},'*'));addEventListener('unhandledrejection',()=>parent.postMessage({type:'diorama:error'},'*'));</script></head>`);
+  html = html.replace('</head>', `<script>addEventListener('error',()=>parent.postMessage({type:'game:error'},'*'));addEventListener('unhandledrejection',()=>parent.postMessage({type:'game:error'},'*'));</script></head>`);
   fs.writeFileSync(path.join(temporary, 'index.html'), html);
 
   const originals = list(source).filter((p) => p.includes(`${path.sep}drawings${path.sep}`) || /\/photo\.[^/]+$/.test(p));
@@ -78,10 +79,10 @@ try {
   await build({ entryPoints: [path.join(here, 'loader.js')], bundle: true, format: 'esm', minify: true, target: 'es2022', outfile: path.join(output, 'loader.js'), legalComments: 'eof', define: { __ARCHIVE_VERSION__: JSON.stringify(hash(path.join(output, 'game.zip')).slice(0, 16)) } });
   const landing = path.join(output, 'index.html');
   fs.writeFileSync(landing, fs.readFileSync(landing, 'utf8').replace(/src="\.\/loader\.js(?:\?v=[^"]*)?"/, `src="./loader.js?v=${hash(path.join(output, 'loader.js')).slice(0, 16)}"`));
-  fs.copyFileSync(path.join(diorama, 'app/studio/favicon.svg'), path.join(output, 'diorama.svg'));
+  fs.copyFileSync(path.join(diorama, 'app/studio/favicon.svg'), path.join(output, 'logo.svg'));
   const license = fs.readFileSync(path.join(here, 'node_modules/@zip.js/zip.js/LICENSE'), 'utf8');
   fs.writeFileSync(path.join(output, 'LICENSE-zip.js.txt'), license);
-  fs.copyFileSync(path.join(diorama, 'LICENSE'), path.join(output, 'LICENSE-Diorama.txt'));
+  fs.copyFileSync(path.join(diorama, 'LICENSE'), path.join(output, 'LICENSE-engine.txt'));
   fs.copyFileSync(path.join(diorama, 'node_modules/three/LICENSE'), path.join(output, 'LICENSE-three.txt'));
   console.log(JSON.stringify({ files: files.length, places: Object.keys(data.places).length, originalFilesExcluded: originals.length, archiveBytes: bytes.byteLength, archiveSha256: hash(path.join(output, 'game.zip')) }, null, 2));
 } finally {

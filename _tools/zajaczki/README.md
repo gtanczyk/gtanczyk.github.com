@@ -1,7 +1,7 @@
-# Zajączki — private Diorama export
+# Zajączki — private game export
 
 The public directory is `/zajaczki-gra/`. Only the landing page, the loader, the
-Diorama mark, the zip.js license and an AES-256 encrypted `game.zip` are published.
+engine mark, the zip.js license and an AES-256 encrypted `game.zip` are published.
 No password, plaintext game, drawing photographs or workshop source files belong
 in this repository. GitHub Pages excludes this `_tools` directory.
 
@@ -43,3 +43,5 @@ scene transition and audio; no plaintext HTTP asset requests. Verify all ZIP
 entries are encrypted, fail without/with a wrong password, and authenticate with
 the chosen password. Check source-photo hashes and public files once more before
 staging. Publish on the existing `master` GitHub Pages branch.
+
+Public branding intentionally uses only the logo. Keep the engine name out of the landing page, metadata and exported runtime. Legal license text remains intact.

@@ -46,14 +46,14 @@ async function mount(html, assets) {
   if (!module || !assets['main.js'] || !assets['world-data.json']) throw new Error('archive');
   module.src = assets['main.js'];
   const bootstrap = doc.createElement('script');
-  bootstrap.src = objectURL(new Blob([`globalThis.__dioramaAssets=${JSON.stringify(assets)};`], { type: 'text/javascript' }));
+  bootstrap.src = objectURL(new Blob([`globalThis.__gameAssets=${JSON.stringify(assets)};`], { type: 'text/javascript' }));
   module.before(bootstrap);
   await new Promise((resolve, reject) => {
     const timeout = setTimeout(() => finish(new Error('start')), 90000);
     const onMessage = (event) => {
       if (event.source !== frame.contentWindow) return;
-      if (event.data?.type === 'diorama:ready') finish();
-      if (event.data?.type === 'diorama:error') finish(new Error('start'));
+      if (event.data?.type === 'game:ready') finish();
+      if (event.data?.type === 'game:error') finish(new Error('start'));
     };
     const finish = (error) => {
       clearTimeout(timeout);
